@@ -1,3 +1,4 @@
+const { POINT_CONVERSION_HYBRID } = require("constants");
 const puppeteer = require("puppeteer");
 
 // Puppeteer docs
@@ -9,8 +10,7 @@ const puppeteer = require("puppeteer");
 // https://github.com/puppeteer/puppeteer/issues/4752
 // https://support.apple.com/en-gb/guide/keychain-access/kyca2686/mac
 
-const url =
-  "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_recommend_harvards_free_online_2016_cs50/";
+const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_recommend_harvards_free_online_2016_cs50/";
 
 (async () => {
   const browser = await puppeteer.launch({ headless: true });
@@ -50,11 +50,16 @@ const url =
       formattedComments.push({ points, text });
     }
   }
-
-  console.log({ formattedComments });
-
+  
   // sort comments by points
-
+  formattedComments.sort( (a,b) => {
+    let pointsA = Number(a.points.split(' ')[0])
+    let pointsB = Number(b.points.split(' ')[0])
+    return pointsB - pointsA
+  })
+  
+  console.log(formattedComments.slice(0,10));
+  
   // insert into google spreadsheet
 
   await browser.close();
