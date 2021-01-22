@@ -29,29 +29,33 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
   let sheet = new Sheet()
   sheet.load()
 
-  // create sheet with title
+  // create sheet with title & headers
   let title = await page.$eval('.title a', el => el.textContent )
   const sheetIndex = await sheet.addSheet( title.slice(0,99), ['points', 'text'] )
 
   // expand all comments thread
   let expandButtons = await page.$$(".morecomments");
+  process.stdout.write("Expanding buttons:")
   while (expandButtons.length) {
     for (let button of expandButtons ) {
       await button.click()
       await page.waitFor(500)
+      process.stdout.write(".")
     }
     await page.waitFor(1000)
     expandButtons = await page.$$('.morecomments')
+    process.stdout.write("#")
   }
 
   // select all comments, scrape text and points
   const comments = await page.$$(".entry");
   const formattedComments = [];
+  let numNoScores = 0
   for (let comment of comments) {
     // scrape points
     const points = await comment
       .$eval(".score", (el) => el.textContent)
-      .catch((err) => console.error("no score"));
+      .catch((err) => { numNoScores++; return null } );
 
     // scrape text
     const rawText = await comment
@@ -60,7 +64,7 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
 
     if (points && rawText) {
       // const text = rawText.replace(/\n/g, '') // regex style
-      const text = rawText.trim();
+      const text = ''+rawText.trim();
       formattedComments.push({ points, text });
     }
   }
@@ -72,7 +76,7 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
     return pointsB - pointsA
   })
   
-  console.log("Line of comments: ",formattedComments.length);
+  console.log("Lines of comments: ",formattedComments.length, ", No Score=", numNoScores);
   
   // insert into google spreadsheet
   sheet.addRows(formattedComments, sheetIndex)
