@@ -21,7 +21,8 @@ const Sheet = require("./sheet");
 const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_recommend_harvards_free_online_2016_cs50/";
 
 (async () => {
-  const browser = await puppeteer.launch({ headless: true });
+  // const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
   // await page.screenshot({path: 'example.png'});
@@ -31,7 +32,7 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
 
   // create sheet with title & headers
   let title = await page.$eval('.title a', el => el.textContent )
-  const sheetIndex = await sheet.addSheet( title.slice(0,99), ['points', 'text'] )
+  const sheetIndex = await sheet.addSheet( title.slice(0,98), ['points', 'text'] )
 
   // expand all comments thread
   let expandButtons = await page.$$(".morecomments");
@@ -76,7 +77,7 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
     return pointsB - pointsA
   })
   
-  console.log("Lines of comments: ",formattedComments.length, ", No Score=", numNoScores);
+  console.log("\nLines of comments=",formattedComments.length, ", No Scores=", numNoScores);
   
   // insert into google spreadsheet
   sheet.addRows(formattedComments, sheetIndex)
