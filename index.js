@@ -52,6 +52,7 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
   const comments = await page.$$(".entry");
   const formattedComments = [];
   let numNoScores = 0
+  process.stdout.write("\nScraping comments:")
   for (let comment of comments) {
     // scrape points
     const points = await comment
@@ -68,6 +69,7 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
       const text = ''+rawText.trim();
       formattedComments.push({ points, text });
     }
+    process.stdout.write(".")
   }
   
   // sort comments by points
