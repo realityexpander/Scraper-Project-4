@@ -1,5 +1,6 @@
 const { POINT_CONVERSION_HYBRID } = require("constants");
 const puppeteer = require("puppeteer");
+const Sheet = require("./sheet");
 
 // Puppeteer docs
 // https://developers.google.com/web/tools/puppeteer
@@ -10,6 +11,13 @@ const puppeteer = require("puppeteer");
 // https://github.com/puppeteer/puppeteer/issues/4752
 // https://support.apple.com/en-gb/guide/keychain-access/kyca2686/mac
 
+// Google sheet docs
+// https://www.npmjs.com/package/google-spreadsheet
+
+// Sheet
+// https://docs.google.com/spreadsheets/d/1WDxlusy9tCNU8vdVyEjRrXIkkAOdsn45wGrTw2F4nzQ/edit#gid=0
+
+
 const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_recommend_harvards_free_online_2016_cs50/";
 
 (async () => {
@@ -18,17 +26,23 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
   await page.goto(url);
   // await page.screenshot({path: 'example.png'});
 
+  let sheet = new Sheet()
+  sheet.load()
+
+  // create sheet with title
+  let title = await page.$eval('.title a', el => el.textContent )
+  const sheetIndex = await sheet.addSheet( title.slice(0,99), ['points', 'text'] )
+
   // expand all comments thread
   let expandButtons = await page.$$(".morecomments");
-
-  // while (expandButtons.length) {
-  //   for (let button of expandButtons ) {
-  //     await button.click()
-  //     await page.waitFor(500)
-  //   }
-  //   await page.waitFor(1000)
-  //   expandButtons = await page.$$('.morecomments')
-  // }
+  while (expandButtons.length) {
+    for (let button of expandButtons ) {
+      await button.click()
+      await page.waitFor(500)
+    }
+    await page.waitFor(1000)
+    expandButtons = await page.$$('.morecomments')
+  }
 
   // select all comments, scrape text and points
   const comments = await page.$$(".entry");
@@ -58,9 +72,10 @@ const url = "https://old.reddit.com/r/learnprogramming/comments/4q6tae/i_highly_
     return pointsB - pointsA
   })
   
-  console.log(formattedComments.slice(0,10));
+  console.log("Line of comments: ",formattedComments.length);
   
   // insert into google spreadsheet
+  sheet.addRows(formattedComments, sheetIndex)
 
   await browser.close();
 })();

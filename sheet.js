@@ -1,13 +1,13 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
 
-// Stock Prices
-// https://docs.google.com/spreadsheets/d/1fz1KCUkLiWRPZ2FThC-wlcZzjbEEE2EIPu8SGeCbwVA/edit#gid=0
+// Reddit Comments
+// https://docs.google.com/spreadsheets/d/1WDxlusy9tCNU8vdVyEjRrXIkkAOdsn45wGrTw2F4nzQ/edit#gid=0
 
 
 class Sheet {
     constructor() {
-        this.doc = new GoogleSpreadsheet('1fz1KCUkLiWRPZ2FThC-wlcZzjbEEE2EIPu8SGeCbwVA');
+        this.doc = new GoogleSpreadsheet('1WDxlusy9tCNU8vdVyEjRrXIkkAOdsn45wGrTw2F4nzQ');
     }
     
     async load() {
@@ -24,6 +24,11 @@ class Sheet {
         const sheet = this.doc.sheetsByIndex[sheetIndex];
         const rows = await sheet.getRows()
         return rows
+    }
+
+    async addSheet(title, headerValues) {
+        const newSheet = await this.doc.addSheet({ title, headerValues }); 
+        return this.doc.sheetsByIndex.length - 1  // returns index of this newly added sheet
     }
 }
 
